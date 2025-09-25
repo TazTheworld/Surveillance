@@ -1,0 +1,14 @@
+# Fichiers de configuration locale
+monitor_backup.py
+restart_monitor.py
+*.log
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+
+# Système
+.DS_Store
+Thumbs.db
