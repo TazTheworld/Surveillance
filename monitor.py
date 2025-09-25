@@ -61,8 +61,8 @@ class Config:
     VERSION = "2.0.0"
     
     # URLs de mise à jour automatique (OBLIGATOIRE À CONFIGURER)
-    UPDATE_CHECK_URL = "https://raw.githubusercontent.com/votre-repo/version.txt"
-    UPDATE_DOWNLOAD_URL = "https://raw.githubusercontent.com/votre-repo/monitor.py"
+    UPDATE_CHECK_URL = "https://raw.githubusercontent.com/TazTheworld/Surveillance/refs/heads/main/version.txt"
+    UPDATE_DOWNLOAD_URL = "https://raw.githubusercontent.com/TazTheworld/Surveillance/refs/heads/main/monitor.py"
     AUTO_UPDATE_ENABLED = True
     UPDATE_CHECK_INTERVAL_HOURS = 24
     
