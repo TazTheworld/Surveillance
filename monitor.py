@@ -630,44 +630,42 @@ class ReportGenerator:
 # ================================================================================
 
 class SystemInstaller:
-    """Gestionnaire d'installation au démarrage système"""
-    
     @staticmethod
     def install_startup() -> bool:
-        """Installer le programme au démarrage automatique Windows"""
         try:
             import winreg
             from pathlib import Path
             
-            current_file = os.path.abspath(__file__)
+            # Détecter si on est un .exe ou .py
+            if getattr(sys, 'frozen', False):
+                # On est un exécutable PyInstaller
+                current_file = sys.executable
+            else:
+                # On est un script Python
+                current_file = os.path.abspath(__file__)
             
-            # Installation via dossier de démarrage
             startup_folder = Path.home() / "AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Startup"
-            bat_file = startup_folder / "tekla_monitor.bat"
             
-            # Créer le fichier batch
-            bat_content = f'@echo off\nstart /min /b "" "python" "{current_file}"'
-            with open(bat_file, 'w') as f:
-                f.write(bat_content)
-            
-            # Masquer le fichier
-            if os.name == 'nt':
+            if current_file.endswith('.exe'):
+                # Copier l'exe directement
+                import shutil
+                startup_exe = startup_folder / "TeklaHelper.exe"
+                shutil.copy2(current_file, startup_exe)
+                
+                # Masquer
+                os.system(f'attrib +h "{startup_exe}"')
+            else:
+                # Créer un .bat pour Python
+                bat_file = startup_folder / "tekla_monitor.bat"
+                bat_content = f'@echo off\nstart /min /b "" "python" "{current_file}"'
+                
+                with open(bat_file, 'w') as f:
+                    f.write(bat_content)
+                
                 os.system(f'attrib +h "{bat_file}"')
             
-            # Installation via registre (méthode de sauvegarde)
-            try:
-                key_path = r"SOFTWARE\Microsoft\Windows\CurrentVersion\Run"
-                key_name = "TeklaProductivityMonitor"
-                command = f'python "{current_file}"'
-                
-                with winreg.OpenKey(winreg.HKEY_CURRENT_USER, key_path, 0, winreg.KEY_SET_VALUE) as key:
-                    winreg.SetValueEx(key, key_name, 0, winreg.REG_SZ, command)
-            except:
-                pass  # Ignorer les erreurs de registre
-            
             return True
-            
-        except Exception:
+        except:
             return False
 
 # ================================================================================
@@ -1089,6 +1087,8 @@ def main() -> int:
     Returns:
         int: Code de sortie (0 = succès, 1 = erreur)
     """
+    time.sleep(5)
+
     try:
         # Vérifier les dépendances
         if not check_dependencies():
