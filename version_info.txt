@@ -19,8 +19,8 @@ VSVersionInfo(
         StringStruct(u'FileVersion', u'2.0.0.0'),
         StringStruct(u'InternalName', u'TeklaTools'),
         StringStruct(u'LegalCopyright', u'Copyright (C) 2024'),
-        StringStruct(u'OriginalFilename', u'TeklaMonitor.exe'),
-        StringStruct(u'ProductName', u'Tekla Productivity Monitor'),
+        StringStruct(u'OriginalFilename', u'TeklaHelper.exe'),
+        StringStruct(u'ProductName', u'Tekla Productivity Helper'),
         StringStruct(u'ProductVersion', u'2.0.0.0')])
       ]),
     VarFileInfo([VarStruct(u'Translation', [1033, 1200])])
