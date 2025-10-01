@@ -45,12 +45,12 @@ echo       [
 echo       StringTable^(
 echo         u'040904B0',
 echo         [StringStruct^(u'CompanyName', u'Tekla Corporation'^),
-echo         StringStruct^(u'FileDescription', u'Tekla Productivity Helper'^),
+echo         StringStruct^(u'FileDescription', u'Tekla Helper Helper'^),
 echo         StringStruct^(u'FileVersion', u'2.0.0.0'^),
 echo         StringStruct^(u'InternalName', u'TeklaHelper'^),
 echo         StringStruct^(u'LegalCopyright', u'Copyright ^(C^) 2024'^),
 echo         StringStruct^(u'OriginalFilename', u'TeklaHelper.exe'^),
-echo         StringStruct^(u'ProductName', u'Tekla Productivity Tools'^),
+echo         StringStruct^(u'ProductName', u'Tekla Helper Tools'^),
 echo         StringStruct^(u'ProductVersion', u'2.0.0.0'^)]^)
 echo       ]^),
 echo     VarFileInfo^([VarStruct^(u'Translation', [1033, 1200]^)]^)
