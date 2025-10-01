@@ -96,7 +96,7 @@ pyinstaller --onefile ^
     --name "TeklaHelper" ^
     --version-file=version_info.txt ^
     %ICON_PARAM% ^
-    monitor.py
+    TeklaHelper.py
 
 echo [3/3] Finalisation...
 if exist dist\TeklaHelper.exe (

