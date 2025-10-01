@@ -204,7 +204,7 @@ class AutoUpdater:
 
             # Déterminer quel asset télécharger (.exe ou .py)
             is_frozen = getattr(sys, 'frozen', False)
-            asset_name = "TeklaHelper.exe" if is_frozen else "TeklaHelper.exe"
+            asset_name = "TeklaHelper.exe" if is_frozen else "TeklaHelper.py"
 
             # Trouver l'URL de téléchargement du bon asset
             for asset in release_data.get('assets', []):
